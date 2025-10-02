@@ -1,4 +1,4 @@
-package restockalertsystem1;
+package restockalertsystem3;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

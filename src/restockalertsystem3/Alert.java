@@ -1,4 +1,4 @@
-package restockalertsystem1;
+package restockalertsystem3;
 
 public class Alert {
     private Product product;

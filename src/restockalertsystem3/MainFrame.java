@@ -1,4 +1,4 @@
-package restockalertsystem1;
+package restockalertsystem3;
 
 import javax.swing.*;
 import javax.swing.table.*;
