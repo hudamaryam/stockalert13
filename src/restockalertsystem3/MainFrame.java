@@ -666,7 +666,7 @@ public class MainFrame extends JFrame {
         int result = JOptionPane.showConfirmDialog(this, panel, "Add New Product", JOptionPane.OK_CANCEL_OPTION);
         
         if (result == JOptionPane.OK_OPTION) {
-            try {
+            
                 String name = nameField.getText().trim();
                 String category = (String) categoryCombo.getSelectedItem();
                 int qty = Integer.parseInt(qtyField.getText().trim());
@@ -678,14 +678,14 @@ public class MainFrame extends JFrame {
                 }
                 
                 Product product = new Product(name, qty, threshold, price, category);
+                ProductDAO productDAO = new ProductDAO();
+                if (productDAO.addProduct(product)) {
                 products.add(product);
                 updateDisplay();
-                
-                JOptionPane.showMessageDialog(this, "Product added successfully!");
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
+                        JOptionPane.showMessageDialog(this, "Product added successfully!");
+                } else {
+                        JOptionPane.showMessageDialog(this, "Error adding product to database!");
+                }
         }
     }
     
@@ -722,6 +722,8 @@ public class MainFrame extends JFrame {
                 }
                 
                 product.sellProduct(sellQty);
+                ProductDAO productDAO = new ProductDAO();
+                productDAO.updateProduct(product);
                 updateDisplay();
                 
                 double revenue = sellQty * product.getPrice();
@@ -1022,42 +1024,35 @@ public class MainFrame extends JFrame {
     }
     
     private void addSampleData() {
-        // Sample products
-        products.add(new Product("MacBook Pro", 15, 5, 2499.99, "Electronics"));
-        products.add(new Product("Wireless Mouse", 50, 10, 79.99, "Electronics"));
-        products.add(new Product("Mechanical Keyboard", 30, 8, 159.99, "Electronics"));
-        products.add(new Product("4K Monitor", 8, 3, 549.99, "Electronics"));
-        products.add(new Product("Noise Cancelling Headphones", 20, 5, 299.99, "Electronics"));
-        products.add(new Product("USB-C Hub", 25, 5, 89.99, "Electronics"));
-        products.add(new Product("Tablet Stand", 40, 10, 39.99, "General"));
-        products.add(new Product("Desk Organizer", 35, 8, 24.99, "General"));
-        
-        // Sample suppliers
-        suppliers.add(new Supplier("TechCorp Solutions", "555-1234", "orders@techcorp.com", "123 Tech Street, Silicon Valley"));
-        suppliers.add(new Supplier("Global Electronics", "555-5678", "sales@globalelec.com", "456 Electronics Ave, Tech City"));
-        suppliers.add(new Supplier("Office Supplies Inc", "555-9876", "contact@officesupplies.com", "789 Business Blvd, Commerce Center"));
-        
-        // Add specialties to suppliers
-        suppliers.get(0).addSpecialty("Electronics");
-        suppliers.get(1).addSpecialty("Electronics");
-        suppliers.get(2).addSpecialty("General");
-        
-        // Sample orders
-        orders.add(new Order(products.get(0), 10, suppliers.get(0)));
-        orders.add(new Order(products.get(1), 25, suppliers.get(1)));
-        orders.add(new Order(products.get(3), 5, suppliers.get(0)));
-        
-        // Confirm some orders
-        orders.get(0).confirmOrder();
-        orders.get(1).confirmOrder();
-        orders.get(1).shipOrder();
-        
-        // Simulate some sales
-        products.get(0).sellProduct(5);
-        products.get(1).sellProduct(15);
-        products.get(2).sellProduct(10);
-        products.get(3).sellProduct(2);
-        products.get(4).sellProduct(8);
+        // Load data from database instead
+        ProductDAO productDAO = new ProductDAO();
+        SupplierDAO supplierDAO = new SupplierDAO();
+        OrderDAO orderDAO = new OrderDAO();
+    
+        products = (ArrayList<Product>) productDAO.getAllProducts();
+        suppliers = (ArrayList<Supplier>) supplierDAO.getAllSuppliers();
+        orders = (ArrayList<Order>) orderDAO.getAllOrders();
+    
+        // If database is empty, add sample data
+        if (products.isEmpty()) {
+            addInitialSampleData();
+        }
+    }
+
+    private void addInitialSampleData() {
+        ProductDAO productDAO = new ProductDAO();
+    
+        // Add sample products
+        Product p1 = new Product("MacBook Pro", 15, 5, 2499.99, "Electronics");
+        Product p2 = new Product("Wireless Mouse", 50, 10, 79.99, "Electronics");
+    
+        productDAO.addProduct(p1);
+        productDAO.addProduct(p2);
+    
+        products.add(p1);
+        products.add(p2);
+    
+    // Similar for suppliers and orders...
     }
     
     private void updateDisplay() {

@@ -62,6 +62,11 @@ public class Product {
     }
     
     // Business methods
+    
+    // Add this method to Product class
+    public void setSoldCount(int soldCount) {
+        this.soldCount = soldCount;
+    }
     public boolean isLowStock() {
         return quantity < minThreshold;
     }
