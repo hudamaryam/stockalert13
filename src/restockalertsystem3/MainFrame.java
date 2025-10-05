@@ -50,11 +50,10 @@ public class MainFrame extends JFrame {
         
         // Set modern look and feel
         try {
-        String className = UIManager.getSystemLookAndFeelClassName();
-        UIManager.setLookAndFeel(className);
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         getContentPane().setBackground(BACKGROUND_COLOR);
         
@@ -327,7 +326,7 @@ public class MainFrame extends JFrame {
     // Add this method inside the 'MainFrame' class, 
 // likely around line 430, near other create*Panel methods.
 
-private JPanel createSupplierControlPanel() {
+    private JPanel createSupplierControlPanel() {
     JPanel controlPanel = new JPanel(new BorderLayout());
     controlPanel.setBackground(CARD_COLOR);
     controlPanel.setBorder(BorderFactory.createCompoundBorder(
