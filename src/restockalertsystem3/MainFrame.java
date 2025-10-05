@@ -50,10 +50,11 @@ public class MainFrame extends JFrame {
         
         // Set modern look and feel
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String className = UIManager.getSystemLookAndFeelClassName();
+        UIManager.setLookAndFeel(className);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
         
         getContentPane().setBackground(BACKGROUND_COLOR);
         
