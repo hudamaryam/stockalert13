@@ -913,19 +913,17 @@ public class MainFrame extends JFrame {
     
     Order order = orders.get(selectedRow);
     if (order.getStatus() == Order.OrderStatus.PENDING) {
-        order.confirmOrder();
-        
-        // FIX: Update order status in database
-        OrderDAO orderDAO = new OrderDAO();
-        if (orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus())) {
-            updateDisplay();
-            JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been confirmed!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Error updating database!");
-        }
+    order.confirmOrder();
+    
+    // ADD THIS:
+    OrderDAO orderDAO = new OrderDAO();
+    if (orderDAO.updateOrder(order)) {
+        updateDisplay();
+        JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been confirmed!");
     } else {
-        JOptionPane.showMessageDialog(this, "Only pending orders can be confirmed.");
+        JOptionPane.showMessageDialog(this, "Error updating database!");
     }
+}
 }
     
     private void cancelOrder() {
@@ -941,17 +939,17 @@ public class MainFrame extends JFrame {
         "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
     
     if (result == JOptionPane.YES_OPTION) {
-        order.cancelOrder();
-        
-        // FIX: Update order status in database
-        OrderDAO orderDAO = new OrderDAO();
-        if (orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus())) {
-            updateDisplay();
-            JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been cancelled!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Error updating database!");
-        }
+    order.cancelOrder();
+    
+    // ADD THIS:
+    OrderDAO orderDAO = new OrderDAO();
+    if (orderDAO.updateOrder(order)) {
+        updateDisplay();
+        JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been cancelled!");
+    } else {
+        JOptionPane.showMessageDialog(this, "Error updating database!");
     }
+}
 }
     
     private void deliverOrder() {
@@ -963,32 +961,27 @@ public class MainFrame extends JFrame {
     
     Order order = orders.get(selectedRow);
     if (order.getStatus() == Order.OrderStatus.SHIPPED) {
-        order.deliverOrder();
-        order.getSupplier().recordOnTimeDelivery();
-        
-        // FIX: Update order in database
-        OrderDAO orderDAO = new OrderDAO();
-        boolean orderUpdated = orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus());
-        
-        // FIX: Update product in database (restock happened)
-        ProductDAO productDAO = new ProductDAO();
-        boolean productUpdated = productDAO.updateProduct(order.getProduct());
-        
-        // FIX: Update supplier in database (delivery recorded)
-        SupplierDAO supplierDAO = new SupplierDAO();
-        boolean supplierUpdated = supplierDAO.updateSupplier(order.getSupplier());
-        
-        if (orderUpdated && productUpdated && supplierUpdated) {
-            updateDisplay();
-            JOptionPane.showMessageDialog(this, 
-                String.format("Order #%d delivered successfully!\n%s restocked with %d units.", 
-                order.getOrderId(), order.getProduct().getName(), order.getQuantityOrdered()));
-        } else {
-            JOptionPane.showMessageDialog(this, "Error updating database!");
-        }
+    order.deliverOrder();
+    order.getSupplier().recordOnTimeDelivery();
+    
+    // ADD THIS:
+    OrderDAO orderDAO = new OrderDAO();
+    ProductDAO productDAO = new ProductDAO();
+    SupplierDAO supplierDAO = new SupplierDAO();
+    
+    boolean orderUpdated = orderDAO.updateOrder(order);
+    boolean productUpdated = productDAO.updateProduct(order.getProduct());
+    boolean supplierUpdated = supplierDAO.updateSupplier(order.getSupplier());
+    
+    if (orderUpdated && productUpdated && supplierUpdated) {
+        updateDisplay();
+        JOptionPane.showMessageDialog(this, 
+            String.format("Order #%d delivered successfully!\n%s restocked with %d units.", 
+            order.getOrderId(), order.getProduct().getName(), order.getQuantityOrdered()));
     } else {
-        JOptionPane.showMessageDialog(this, "Only shipped orders can be marked as delivered.");
+        JOptionPane.showMessageDialog(this, "Error updating database!");
     }
+}
 }
     
     private void addSupplier() {

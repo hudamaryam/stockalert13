@@ -9,7 +9,7 @@ public class Order {
     }
     
     private static int orderCounter = 1000; // Starting order ID
-    
+    private Integer databaseId;
     private int orderId;
     private Product product;
     private int quantityOrdered;
@@ -44,6 +44,9 @@ public class Order {
     }
     
     // Getters
+    public int getDatabaseId(){
+        return databaseId;
+    }
     public int getOrderId() {
         return orderId;
     }
@@ -81,6 +84,10 @@ public class Order {
     }
     
     // Setters
+    
+    public void setDatabaseId(Integer id) {
+    this.databaseId = id;
+}
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
