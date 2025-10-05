@@ -37,6 +37,11 @@ public class SupplierDAO {
         }
         
     } catch (SQLException e) {
+        System.err.println("--- SUPPLIER DAO INSERT FAILED ---");
+        System.err.println("SQL Error Code: " + e.getErrorCode());
+        System.err.println("SQL State: " + e.getSQLState());
+        System.err.println("Database Error Message: " + e.getMessage());
+        e.printStackTrace();
         e.printStackTrace();
     }
     return false;
