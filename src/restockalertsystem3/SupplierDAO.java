@@ -47,13 +47,13 @@ public class SupplierDAO {
     return false;
 }
     
-    private void addSupplierSpecialty(int supplierId, String specialty) {
+    private void addSupplierSpecialty(int id, String specialty) {
         String sql = "INSERT INTO supplier_specialties (supplier_id, specialty) VALUES (?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, supplierId);
+            pstmt.setInt(1, id);
             pstmt.setString(2, specialty);
             pstmt.executeUpdate();
             
@@ -101,14 +101,14 @@ public List<Supplier> getAllSuppliers() {
     return suppliers;
 }
     
-    private List<String> getSupplierSpecialties(int supplierId) {
+    private List<String> getSupplierSpecialties(int id) {
         List<String> specialties = new ArrayList<>();
         String sql = "SELECT specialty FROM supplier_specialties WHERE supplier_id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, supplierId);
+            pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
