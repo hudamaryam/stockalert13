@@ -129,31 +129,28 @@ public List<Supplier> getAllSuppliers() {
     }
     
     public boolean updateSupplier(Supplier supplier) {
-    String sql = "UPDATE suppliers SET phone = ?, email = ?, address = ?, reliability_rating = ?, is_active = ?, total_orders = ?, orders_on_time = ? WHERE id = ?";
-    
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE suppliers SET phone = ?, email = ?, address = ?, reliability_rating = ?, is_active = ?, total_orders = ?, orders_on_time = ? WHERE name = ?";
         
-        pstmt.setString(1, supplier.getPhone());
-        pstmt.setString(2, supplier.getEmail());
-        pstmt.setString(3, supplier.getAddress());
-        pstmt.setDouble(4, supplier.getReliabilityRating());
-        pstmt.setBoolean(5, supplier.isActive());
-        pstmt.setInt(6, supplier.getTotalOrdersPlaced());
-        pstmt.setInt(7, supplier.getOrdersDeliveredOnTime());
-        // Use the reliable database ID for lookup
-        pstmt.setInt(8, supplier.getId()); 
-        
-        int rowsAffected = pstmt.executeUpdate();
-        return rowsAffected > 0;
-        
-    } catch (SQLException e) {
-        // Output error to console if update fails
-        System.err.println("--- SUPPLIER DAO UPDATE FAILED ---");
-        e.printStackTrace();
-        return false;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, supplier.getPhone());
+            pstmt.setString(2, supplier.getEmail());
+            pstmt.setString(3, supplier.getAddress());
+            pstmt.setDouble(4, supplier.getReliabilityRating());
+            pstmt.setBoolean(5, supplier.isActive());
+            pstmt.setInt(6, supplier.getTotalOrdersPlaced());
+            pstmt.setInt(7, supplier.getOrdersDeliveredOnTime());
+            pstmt.setString(8, supplier.getName());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
     
     public Supplier getSupplierByName(String name) {
         String sql = "SELECT * FROM suppliers WHERE name = ?";
