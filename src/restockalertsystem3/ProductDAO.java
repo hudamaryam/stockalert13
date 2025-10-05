@@ -45,12 +45,8 @@ public class ProductDAO {
                     rs.getString("category")
                 );
                 
-                // Set sold count manually since constructor doesn't support it
-                int soldCount = rs.getInt("sold_count");
-                for (int i = 0; i < soldCount; i++) {
-                    product.sellProduct(0); // This is a workaround
-                }
-                // Better approach: modify Product to have setSoldCount method
+                // FIX: Properly set sold count using the new setter method
+                product.setSoldCount(rs.getInt("sold_count"));
                 
                 products.add(product);
             }
@@ -110,13 +106,15 @@ public class ProductDAO {
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
-                return new Product(
+                Product product = new Product(
                     rs.getString("name"),
                     rs.getInt("quantity"),
                     rs.getInt("min_threshold"),
                     rs.getDouble("price"),
                     rs.getString("category")
                 );
+                product.setSoldCount(rs.getInt("sold_count"));
+                return product;
             }
             
         } catch (SQLException e) {
@@ -135,13 +133,15 @@ public class ProductDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             
             while (rs.next()) {
-                products.add(new Product(
+                Product product = new Product(
                     rs.getString("name"),
                     rs.getInt("quantity"),
                     rs.getInt("min_threshold"),
                     rs.getDouble("price"),
                     rs.getString("category")
-                ));
+                );
+                product.setSoldCount(rs.getInt("sold_count"));
+                products.add(product);
             }
             
         } catch (SQLException e) {

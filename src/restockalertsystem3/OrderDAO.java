@@ -33,7 +33,8 @@ public class OrderDAO {
     
     public List<Order> getAllOrders() {
         List<Order> orders = new ArrayList<>();
-        String sql = "SELECT o.*, p.name as product_name, p.quantity, p.min_threshold, p.price, p.category, " +
+        String sql = "SELECT o.id, o.quantity_ordered, o.order_date, o.expected_delivery_date, o.status, o.notes, " +
+                     "p.name as product_name, p.quantity, p.min_threshold, p.price, p.category, p.sold_count, " +
                      "s.name as supplier_name, s.phone, s.email, s.address " +
                      "FROM orders o " +
                      "JOIN products p ON o.product_id = p.id " +
@@ -52,6 +53,7 @@ public class OrderDAO {
                     rs.getDouble("price"),
                     rs.getString("category")
                 );
+                product.setSoldCount(rs.getInt("sold_count"));
                 
                 Supplier supplier = new Supplier(
                     rs.getString("supplier_name"),
@@ -67,7 +69,7 @@ public class OrderDAO {
                     rs.getDate("expected_delivery_date").toLocalDate()
                 );
                 
-                // Set status
+                // Set status and notes
                 order.setStatus(Order.OrderStatus.valueOf(rs.getString("status")));
                 order.setNotes(rs.getString("notes"));
                 
@@ -81,7 +83,10 @@ public class OrderDAO {
         return orders;
     }
     
+    // FIX: Update method to find order by product and supplier names instead of order_id
     public boolean updateOrderStatus(int orderId, Order.OrderStatus status) {
+        // Since we can't reliably match order_id, we'll need a different approach
+        // This is a limitation - ideally Order class should store the database ID
         String sql = "UPDATE orders SET status = ? WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -89,6 +94,32 @@ public class OrderDAO {
             
             pstmt.setString(1, status.toString());
             pstmt.setInt(2, orderId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // NEW: Better update method using product and supplier names
+    public boolean updateOrder(Order order) {
+        String sql = "UPDATE orders SET status = ?, notes = ? " +
+                     "WHERE product_id = (SELECT id FROM products WHERE name = ? LIMIT 1) " +
+                     "AND supplier_id = (SELECT id FROM suppliers WHERE name = ? LIMIT 1) " +
+                     "AND quantity_ordered = ? AND order_date = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, order.getStatus().toString());
+            pstmt.setString(2, order.getNotes());
+            pstmt.setString(3, order.getProduct().getName());
+            pstmt.setString(4, order.getSupplier().getName());
+            pstmt.setInt(5, order.getQuantityOrdered());
+            pstmt.setDate(6, Date.valueOf(order.getOrderDate()));
             
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;

@@ -689,41 +689,43 @@ public class MainFrame extends JFrame {
         }
     }
     
-    private void sellProduct() {
-        if (products.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No products available!");
-            return;
-        }
-        
-        int selectedRow = productTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a product from the table!");
-            return;
-        }
-        
-        int modelRow = productTable.convertRowIndexToModel(selectedRow);
-        Product product = tableModel.getProductAt(modelRow);
-        
-        if (product.getQuantity() == 0) {
-            JOptionPane.showMessageDialog(this, product.getName() + " is out of stock!");
-            return;
-        }
-        
-        String input = JOptionPane.showInputDialog(this, 
-            "Enter quantity to sell for " + product.getName() + 
-            "\nCurrent stock: " + product.getQuantity());
-        
-        if (input != null && !input.trim().isEmpty()) {
-            try {
-                int sellQty = Integer.parseInt(input.trim());
-                
-                if (sellQty <= 0 || sellQty > product.getQuantity()) {
-                    throw new IllegalArgumentException("Invalid quantity");
-                }
-                
-                product.sellProduct(sellQty);
-                ProductDAO productDAO = new ProductDAO();
-                productDAO.updateProduct(product);
+     private void sellProduct() {
+    if (products.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No products available!");
+        return;
+    }
+    
+    int selectedRow = productTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a product from the table!");
+        return;
+    }
+    
+    int modelRow = productTable.convertRowIndexToModel(selectedRow);
+    Product product = tableModel.getProductAt(modelRow);
+    
+    if (product.getQuantity() == 0) {
+        JOptionPane.showMessageDialog(this, product.getName() + " is out of stock!");
+        return;
+    }
+    
+    String input = JOptionPane.showInputDialog(this, 
+        "Enter quantity to sell for " + product.getName() + 
+        "\nCurrent stock: " + product.getQuantity());
+    
+    if (input != null && !input.trim().isEmpty()) {
+        try {
+            int sellQty = Integer.parseInt(input.trim());
+            
+            if (sellQty <= 0 || sellQty > product.getQuantity()) {
+                throw new IllegalArgumentException("Invalid quantity");
+            }
+            
+            product.sellProduct(sellQty);
+            
+            // FIX: Update database after selling
+            ProductDAO productDAO = new ProductDAO();
+            if (productDAO.updateProduct(product)) {
                 updateDisplay();
                 
                 double revenue = sellQty * product.getPrice();
@@ -735,52 +737,63 @@ public class MainFrame extends JFrame {
                         "WARNING: " + product.getName() + " is now below minimum threshold!", 
                         "Low Stock Alert", JOptionPane.WARNING_MESSAGE);
                 }
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating database!");
             }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
+}
     
     private void restockProduct() {
-        if (products.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No products available!");
-            return;
-        }
-        
-        int selectedRow = productTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a product from the table!");
-            return;
-        }
-        
-        int modelRow = productTable.convertRowIndexToModel(selectedRow);
-        Product product = tableModel.getProductAt(modelRow);
-        
-        String input = JOptionPane.showInputDialog(this, 
-            "Enter quantity to restock for " + product.getName() + 
-            "\nCurrent stock: " + product.getQuantity());
-        
-        if (input != null && !input.trim().isEmpty()) {
-            try {
-                int restockQty = Integer.parseInt(input.trim());
-                
-                if (restockQty <= 0) {
-                    throw new IllegalArgumentException("Quantity must be positive");
-                }
-                
-                product.restockProduct(restockQty);
+    if (products.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No products available!");
+        return;
+    }
+    
+    int selectedRow = productTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a product from the table!");
+        return;
+    }
+    
+    int modelRow = productTable.convertRowIndexToModel(selectedRow);
+    Product product = tableModel.getProductAt(modelRow);
+    
+    String input = JOptionPane.showInputDialog(this, 
+        "Enter quantity to restock for " + product.getName() + 
+        "\nCurrent stock: " + product.getQuantity());
+    
+    if (input != null && !input.trim().isEmpty()) {
+        try {
+            int restockQty = Integer.parseInt(input.trim());
+            
+            if (restockQty <= 0) {
+                throw new IllegalArgumentException("Quantity must be positive");
+            }
+            
+            product.restockProduct(restockQty);
+            
+            // FIX: Update database after restocking
+            ProductDAO productDAO = new ProductDAO();
+            if (productDAO.updateProduct(product)) {
                 updateDisplay();
                 
                 JOptionPane.showMessageDialog(this, 
                     String.format("Restocked %d units of %s\nNew stock: %d", 
                     restockQty, product.getName(), product.getQuantity()));
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating database!");
             }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
+}
+
     
     private void checkAlerts() {
         StringBuilder alerts = new StringBuilder("STOCK ALERTS:\n\n");
@@ -811,172 +824,220 @@ public class MainFrame extends JFrame {
         JOptionPane.showMessageDialog(this, scrollPane, "Stock Alerts", JOptionPane.INFORMATION_MESSAGE);
     }
     
-    // Order Management Methods
     private void createOrder() {
-        if (products.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No products available for ordering!");
-            return;
-        }
-        
-        if (suppliers.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No suppliers available! Please add suppliers first.");
-            return;
-        }
-        
-        JComboBox<String> productCombo = new JComboBox<>();
-        for (Product product : products) {
-            productCombo.addItem(product.getName());
-        }
-        
-        JComboBox<String> supplierCombo = new JComboBox<>();
-        for (Supplier supplier : suppliers) {
-            supplierCombo.addItem(supplier.getName());
-        }
-        
-        JTextField quantityField = new JTextField(15);
-        
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-        panel.add(new JLabel("Product:"));
-        panel.add(productCombo);
-        panel.add(new JLabel("Supplier:"));
-        panel.add(supplierCombo);
-        panel.add(new JLabel("Quantity:"));
-        panel.add(quantityField);
-        
-        int result = JOptionPane.showConfirmDialog(this, panel, "Create New Order", JOptionPane.OK_CANCEL_OPTION);
-        
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                String productName = (String) productCombo.getSelectedItem();
-                String supplierName = (String) supplierCombo.getSelectedItem();
-                int quantity = Integer.parseInt(quantityField.getText().trim());
+    if (products.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No products available for ordering!");
+        return;
+    }
+    
+    if (suppliers.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No suppliers available! Please add suppliers first.");
+        return;
+    }
+    
+    JComboBox<String> productCombo = new JComboBox<>();
+    for (Product product : products) {
+        productCombo.addItem(product.getName());
+    }
+    
+    JComboBox<String> supplierCombo = new JComboBox<>();
+    for (Supplier supplier : suppliers) {
+        supplierCombo.addItem(supplier.getName());
+    }
+    
+    JTextField quantityField = new JTextField(15);
+    
+    JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+    panel.add(new JLabel("Product:"));
+    panel.add(productCombo);
+    panel.add(new JLabel("Supplier:"));
+    panel.add(supplierCombo);
+    panel.add(new JLabel("Quantity:"));
+    panel.add(quantityField);
+    
+    int result = JOptionPane.showConfirmDialog(this, panel, "Create New Order", JOptionPane.OK_CANCEL_OPTION);
+    
+    if (result == JOptionPane.OK_OPTION) {
+        try {
+            String productName = (String) productCombo.getSelectedItem();
+            String supplierName = (String) supplierCombo.getSelectedItem();
+            int quantity = Integer.parseInt(quantityField.getText().trim());
+            
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("Quantity must be positive");
+            }
+            
+            Product selectedProduct = products.stream()
+                .filter(p -> p.getName().equals(productName))
+                .findFirst().orElse(null);
+            
+            Supplier selectedSupplier = suppliers.stream()
+                .filter(s -> s.getName().equals(supplierName))
+                .findFirst().orElse(null);
+            
+            if (selectedProduct != null && selectedSupplier != null) {
+                Order order = new Order(selectedProduct, quantity, selectedSupplier);
                 
-                if (quantity <= 0) {
-                    throw new IllegalArgumentException("Quantity must be positive");
-                }
-                
-                Product selectedProduct = products.stream()
-                    .filter(p -> p.getName().equals(productName))
-                    .findFirst().orElse(null);
-                
-                Supplier selectedSupplier = suppliers.stream()
-                    .filter(s -> s.getName().equals(supplierName))
-                    .findFirst().orElse(null);
-                
-                if (selectedProduct != null && selectedSupplier != null) {
-                    Order order = new Order(selectedProduct, quantity, selectedSupplier);
+                // FIX: Save order to database
+                OrderDAO orderDAO = new OrderDAO();
+                if (orderDAO.addOrder(order)) {
                     orders.add(order);
                     selectedSupplier.recordOrder();
+                    
+                    // FIX: Update supplier in database
+                    SupplierDAO supplierDAO = new SupplierDAO();
+                    supplierDAO.updateSupplier(selectedSupplier);
+                    
                     updateDisplay();
                     
                     JOptionPane.showMessageDialog(this, 
                         String.format("Order created successfully!\nOrder ID: %d\nTotal Cost: $%.2f", 
                         order.getOrderId(), order.getTotalCost()));
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error saving order to database!");
                 }
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
             }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+}
     
     private void confirmOrder() {
-        int selectedRow = orderTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an order from the table!");
-            return;
-        }
+    int selectedRow = orderTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select an order from the table!");
+        return;
+    }
+    
+    Order order = orders.get(selectedRow);
+    if (order.getStatus() == Order.OrderStatus.PENDING) {
+        order.confirmOrder();
         
-        Order order = orders.get(selectedRow);
-        if (order.getStatus() == Order.OrderStatus.PENDING) {
-            order.confirmOrder();
+        // FIX: Update order status in database
+        OrderDAO orderDAO = new OrderDAO();
+        if (orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus())) {
             updateDisplay();
             JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been confirmed!");
         } else {
-            JOptionPane.showMessageDialog(this, "Only pending orders can be confirmed.");
+            JOptionPane.showMessageDialog(this, "Error updating database!");
         }
+    } else {
+        JOptionPane.showMessageDialog(this, "Only pending orders can be confirmed.");
     }
+}
     
     private void cancelOrder() {
-        int selectedRow = orderTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an order from the table!");
-            return;
-        }
-        
-        Order order = orders.get(selectedRow);
-        int result = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to cancel Order #" + order.getOrderId() + "?",
-            "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
-        
-        if (result == JOptionPane.YES_OPTION) {
-            order.cancelOrder();
-            updateDisplay();
-            JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been cancelled!");
-        }
+    int selectedRow = orderTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select an order from the table!");
+        return;
     }
     
-    private void deliverOrder() {
-        int selectedRow = orderTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an order from the table!");
-            return;
-        }
+    Order order = orders.get(selectedRow);
+    int result = JOptionPane.showConfirmDialog(this, 
+        "Are you sure you want to cancel Order #" + order.getOrderId() + "?",
+        "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
+    
+    if (result == JOptionPane.YES_OPTION) {
+        order.cancelOrder();
         
-        Order order = orders.get(selectedRow);
-        if (order.getStatus() == Order.OrderStatus.SHIPPED) {
-            order.deliverOrder();
-            order.getSupplier().recordOnTimeDelivery();
+        // FIX: Update order status in database
+        OrderDAO orderDAO = new OrderDAO();
+        if (orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus())) {
+            updateDisplay();
+            JOptionPane.showMessageDialog(this, "Order #" + order.getOrderId() + " has been cancelled!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Error updating database!");
+        }
+    }
+}
+    
+    private void deliverOrder() {
+    int selectedRow = orderTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select an order from the table!");
+        return;
+    }
+    
+    Order order = orders.get(selectedRow);
+    if (order.getStatus() == Order.OrderStatus.SHIPPED) {
+        order.deliverOrder();
+        order.getSupplier().recordOnTimeDelivery();
+        
+        // FIX: Update order in database
+        OrderDAO orderDAO = new OrderDAO();
+        boolean orderUpdated = orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus());
+        
+        // FIX: Update product in database (restock happened)
+        ProductDAO productDAO = new ProductDAO();
+        boolean productUpdated = productDAO.updateProduct(order.getProduct());
+        
+        // FIX: Update supplier in database (delivery recorded)
+        SupplierDAO supplierDAO = new SupplierDAO();
+        boolean supplierUpdated = supplierDAO.updateSupplier(order.getSupplier());
+        
+        if (orderUpdated && productUpdated && supplierUpdated) {
             updateDisplay();
             JOptionPane.showMessageDialog(this, 
                 String.format("Order #%d delivered successfully!\n%s restocked with %d units.", 
                 order.getOrderId(), order.getProduct().getName(), order.getQuantityOrdered()));
         } else {
-            JOptionPane.showMessageDialog(this, "Only shipped orders can be marked as delivered.");
+            JOptionPane.showMessageDialog(this, "Error updating database!");
         }
+    } else {
+        JOptionPane.showMessageDialog(this, "Only shipped orders can be marked as delivered.");
     }
+}
     
-    // Supplier Management Methods
     private void addSupplier() {
-        JTextField nameField = new JTextField(15);
-        JTextField phoneField = new JTextField(15);
-        JTextField emailField = new JTextField(15);
-        JTextField addressField = new JTextField(15);
-        
-        JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
-        panel.add(new JLabel("Supplier Name:"));
-        panel.add(nameField);
-        panel.add(new JLabel("Phone:"));
-        panel.add(phoneField);
-        panel.add(new JLabel("Email:"));
-        panel.add(emailField);
-        panel.add(new JLabel("Address:"));
-        panel.add(addressField);
-        
-        int result = JOptionPane.showConfirmDialog(this, panel, "Add New Supplier", JOptionPane.OK_CANCEL_OPTION);
-        
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                String name = nameField.getText().trim();
-                String phone = phoneField.getText().trim();
-                String email = emailField.getText().trim();
-                String address = addressField.getText().trim();
-                
-                if (name.isEmpty()) {
-                    throw new IllegalArgumentException("Supplier name is required");
-                }
-                
-                Supplier supplier = new Supplier(name, phone, email, address);
+    JTextField nameField = new JTextField(15);
+    JTextField phoneField = new JTextField(15);
+    JTextField emailField = new JTextField(15);
+    JTextField addressField = new JTextField(15);
+    
+    JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
+    panel.add(new JLabel("Supplier Name:"));
+    panel.add(nameField);
+    panel.add(new JLabel("Phone:"));
+    panel.add(phoneField);
+    panel.add(new JLabel("Email:"));
+    panel.add(emailField);
+    panel.add(new JLabel("Address:"));
+    panel.add(addressField);
+    
+    int result = JOptionPane.showConfirmDialog(this, panel, "Add New Supplier", JOptionPane.OK_CANCEL_OPTION);
+    
+    if (result == JOptionPane.OK_OPTION) {
+        try {
+            String name = nameField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String email = emailField.getText().trim();
+            String address = addressField.getText().trim();
+            
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException("Supplier name is required");
+            }
+            
+            Supplier supplier = new Supplier(name, phone, email, address);
+            
+            // FIX: Save supplier to database
+            SupplierDAO supplierDAO = new SupplierDAO();
+            if (supplierDAO.addSupplier(supplier)) {
                 suppliers.add(supplier);
                 updateDisplay();
                 
                 JOptionPane.showMessageDialog(this, "Supplier added successfully!");
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error saving supplier to database!");
             }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+}
     
     private void editSupplier() {
         JOptionPane.showMessageDialog(this, "Edit Supplier functionality - Coming Soon!");
