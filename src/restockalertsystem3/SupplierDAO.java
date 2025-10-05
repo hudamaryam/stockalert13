@@ -15,7 +15,14 @@ public class SupplierDAO {
     try (Connection conn = DatabaseConnection.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
         
-        // [Parameter binding for 1 through 8 remains the same]
+    pstmt.setString(1, supplier.getName());
+    pstmt.setString(2, supplier.getPhone());
+    pstmt.setString(3, supplier.getEmail());
+    pstmt.setString(4, supplier.getAddress());
+    pstmt.setDouble(5, supplier.getReliabilityRating());
+    pstmt.setBoolean(6, supplier.isActive());
+    pstmt.setInt(7, supplier.getTotalOrdersPlaced());
+    pstmt.setInt(8, supplier.getOrdersDeliveredOnTime());
         
         int rowsAffected = pstmt.executeUpdate();
         
