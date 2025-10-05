@@ -57,7 +57,8 @@ public class SupplierDAO {
         }
     }
     
-    public List<Supplier> getAllSuppliers() {
+    // REPLACE the existing getAllSuppliers() method in SupplierDAO.java
+public List<Supplier> getAllSuppliers() {
     List<Supplier> suppliers = new ArrayList<>();
     String sql = "SELECT * FROM suppliers ORDER BY name";
     
@@ -66,23 +67,21 @@ public class SupplierDAO {
          ResultSet rs = stmt.executeQuery(sql)) {
         
         while (rs.next()) {
+            // FIX: Use the new constructor to fully hydrate the object
             Supplier supplier = new Supplier(
+                rs.getInt("id"), // New: Set the database ID
                 rs.getString("name"),
                 rs.getString("phone"),
                 rs.getString("email"),
-                rs.getString("address")
+                rs.getString("address"),
+                rs.getDouble("reliability_rating"), // New: Load rating
+                rs.getBoolean("is_active"),         // New: Load status
+                rs.getInt("total_orders"),          // New: Load total orders
+                rs.getInt("orders_on_time")         // New: Load on-time orders
             );
             
-            supplier.setActive(rs.getBoolean("is_active"));
-            
-            // FIX: Use setters to load statistics correctly
-            supplier.setTotalOrdersPlaced(rs.getInt("total_orders"));
-            supplier.setOrdersDeliveredOnTime(rs.getInt("orders_on_time"));
-            supplier.setReliabilityRating(rs.getDouble("reliability_rating"));
-            
-            // Load specialties
-            int supplierId = rs.getInt("id");
-            List<String> specialties = getSupplierSpecialties(supplierId);
+            // Load specialties (as this still requires a separate call)
+            List<String> specialties = getSupplierSpecialties(supplier.getSupplierId()); 
             for (String specialty : specialties) {
                 supplier.addSpecialty(specialty);
             }

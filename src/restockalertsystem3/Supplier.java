@@ -39,6 +39,28 @@ public class Supplier {
         this.phone = phone;
         this.contactInfo = phone + " / " + email;
     }
+    // ADD this constructor to Supplier.java
+    // This constructor is used ONLY by the DAO to load existing records fully from the database.
+    public Supplier(int id, String name, String phone, String email, String address, 
+                    double reliabilityRating, boolean isActive, 
+                    int totalOrdersPlaced, int ordersDeliveredOnTime) {
+    
+    // Set ID and contact info
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        this.contactInfo = phone + " / " + email;
+
+    // Set performance stats directly
+        this.reliabilityRating = reliabilityRating;
+        this.isActive = isActive;
+        this.totalOrdersPlaced = totalOrdersPlaced;
+        this.ordersDeliveredOnTime = ordersDeliveredOnTime;
+    
+    this.specialties = new ArrayList<>(); // Still initialize specialties list
+    }
     
     // Getters
     public int getSupplierId() {
