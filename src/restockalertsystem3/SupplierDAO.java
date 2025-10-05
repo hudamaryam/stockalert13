@@ -92,7 +92,7 @@ public List<Supplier> getAllSuppliers() {
             );
             
             // Load specialties (as this still requires a separate call)
-            List<String> specialties = getSupplierSpecialties(supplier.getSupplierId()); 
+            List<String> specialties = getSupplierSpecialties(supplier.getId()); 
             for (String specialty : specialties) {
                 supplier.addSpecialty(specialty);
             }

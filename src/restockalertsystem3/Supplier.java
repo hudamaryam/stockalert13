@@ -63,7 +63,7 @@ public class Supplier {
     }
     
     // Getters
-    public int getSupplierId() {
+    public int getId() {
         return id;
     }
     
