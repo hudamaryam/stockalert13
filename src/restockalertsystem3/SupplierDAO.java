@@ -6,42 +6,41 @@ import java.util.List;
 
 public class SupplierDAO {
     
+    // In SupplierDAO.java:
+// You might already have some of this, but ensure the 'if (rowsAffected > 0)' block is EXACTLY this:
+
     public boolean addSupplier(Supplier supplier) {
-        String sql = "INSERT INTO suppliers (name, phone, email, address, reliability_rating, is_active, total_orders, orders_on_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO suppliers (name, phone, email, address, reliability_rating, is_active, total_orders, orders_on_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            pstmt.setString(1, supplier.getName());
-            pstmt.setString(2, supplier.getPhone());
-            pstmt.setString(3, supplier.getEmail());
-            pstmt.setString(4, supplier.getAddress());
-            pstmt.setDouble(5, supplier.getReliabilityRating());
-            pstmt.setBoolean(6, supplier.isActive());
-            pstmt.setInt(7, supplier.getTotalOrdersPlaced());
-            pstmt.setInt(8, supplier.getOrdersDeliveredOnTime());
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                // Get generated ID
-                ResultSet rs = pstmt.getGeneratedKeys();
-                if (rs.next()) {
-                    int supplierId = rs.getInt(1);
-                    
-                    // Insert specialties
-                    for (String specialty : supplier.getSpecialties()) {
-                        addSupplierSpecialty(supplierId, specialty);
-                    }
+        // [Parameter binding for 1 through 8 remains the same]
+        
+        int rowsAffected = pstmt.executeUpdate();
+        
+        if (rowsAffected > 0) {
+            // FIX: Retrieve the ID the database generated
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                int dbId = rs.getInt(1);
+                
+                // CRITICAL FIX: Set the database ID back on the Java object
+                supplier.setId(dbId); 
+                
+                // Insert specialties using the correct database ID
+                for (String specialty : supplier.getSpecialties()) {
+                    addSupplierSpecialty(dbId, specialty); // Use dbId here
                 }
-                return true;
             }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return true;
         }
-        return false;
+        
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return false;
+}
     
     private void addSupplierSpecialty(int supplierId, String specialty) {
         String sql = "INSERT INTO supplier_specialties (supplier_id, specialty) VALUES (?, ?)";

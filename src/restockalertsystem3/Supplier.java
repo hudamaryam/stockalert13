@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Supplier {
-    private static int supplierIdCounter = 1;
+
     
-    private int supplierId;
+    private int id;
     private String name;
     private String contactInfo;
     private String email;
@@ -19,7 +19,7 @@ public class Supplier {
     private int ordersDeliveredOnTime;
     
     public Supplier(String name, String contactInfo) {
-        this.supplierId = supplierIdCounter++;
+   
         this.name = name;
         this.contactInfo = contactInfo;
         this.email = "";
@@ -42,7 +42,7 @@ public class Supplier {
     
     // Getters
     public int getSupplierId() {
-        return supplierId;
+        return id;
     }
     
     public String getName() {
@@ -87,6 +87,10 @@ public class Supplier {
     
     // Setters
     // Add these new setter methods
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public void setTotalOrdersPlaced(int totalOrdersPlaced) {
         this.totalOrdersPlaced = totalOrdersPlaced;
     }
@@ -207,7 +211,7 @@ public class Supplier {
         StringBuilder info = new StringBuilder();
         info.append("SUPPLIER DETAILS\n");
         info.append("=".repeat(40)).append("\n");
-        info.append("ID: ").append(supplierId).append("\n");
+        info.append("ID: ").append(id).append("\n");
         info.append("Name: ").append(name).append("\n");
         info.append("Phone: ").append(phone.isEmpty() ? "N/A" : phone).append("\n");
         info.append("Email: ").append(email.isEmpty() ? "N/A" : email).append("\n");
@@ -231,11 +235,11 @@ public class Supplier {
         if (obj == null || getClass() != obj.getClass()) return false;
         
         Supplier supplier = (Supplier) obj;
-        return supplierId == supplier.supplierId;
+        return id == supplier.id;
     }
     
     @Override
     public int hashCode() {
-        return Integer.hashCode(supplierId);
+        return Integer.hashCode(id);
     }
 }
