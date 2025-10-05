@@ -83,26 +83,6 @@ public class OrderDAO {
         return orders;
     }
     
-    // FIX: Update method to find order by product and supplier names instead of order_id
-    public boolean updateOrderStatus(int orderId, Order.OrderStatus status) {
-        // Since we can't reliably match order_id, we'll need a different approach
-        // This is a limitation - ideally Order class should store the database ID
-        String sql = "UPDATE orders SET status = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, status.toString());
-            pstmt.setInt(2, orderId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
     
     // NEW: Better update method using product and supplier names
     public boolean updateOrder(Order order) {

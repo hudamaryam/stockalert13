@@ -324,110 +324,401 @@ public class MainFrame extends JFrame {
         return tablePanel;
     }
     
-    private JPanel createSupplierControlPanel() {
-        JPanel controlPanel = new JPanel(new BorderLayout());
-        controlPanel.setBackground(CARD_COLOR);
-        controlPanel.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(new Color(230, 230, 230), 1),
-            new EmptyBorder(15, 20, 15, 20)
-        ));
-        
-        JLabel titleLabel = new JLabel("Supplier Management");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLabel.setForeground(TEXT_PRIMARY);
-        
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        rightPanel.setOpaque(false);
-        
-        JButton addSupplierBtn = createModernButton("Add Supplier", SECONDARY_COLOR, 130, 35);
-        JButton editSupplierBtn = createModernButton("Edit", WARNING_COLOR, 80, 35);
-        JButton viewDetailsBtn = createModernButton("View Details", PRIMARY_COLOR, 120, 35);
-        
-        addSupplierBtn.addActionListener(e -> addSupplier());
-        editSupplierBtn.addActionListener(e -> editSupplier());
-        viewDetailsBtn.addActionListener(e -> viewSupplierDetails());
-        
-        rightPanel.add(addSupplierBtn);
-        rightPanel.add(editSupplierBtn);
-        rightPanel.add(viewDetailsBtn);
-        
-        controlPanel.add(titleLabel, BorderLayout.WEST);
-        controlPanel.add(rightPanel, BorderLayout.EAST);
-        
-        return controlPanel;
-    }
-    
+    // Replace the createSupplierInfoPanel() method in MainFrame.java with this improved version
+
     private JPanel createSupplierInfoPanel() {
-        JPanel supplierPanel = new JPanel(new GridLayout(2, 1, 10, 10));
-        supplierPanel.setBackground(BACKGROUND_COLOR);
+    JPanel supplierPanel = new JPanel(new BorderLayout(10, 10));
+    supplierPanel.setBackground(BACKGROUND_COLOR);
+    
+    if (suppliers.isEmpty()) {
+        // Show empty state with better design
+        JPanel emptyPanel = new JPanel(new GridBagLayout());
+        emptyPanel.setBackground(CARD_COLOR);
+        emptyPanel.setBorder(new LineBorder(new Color(230, 230, 230), 1));
         
-        // Supplier list
-        JPanel listPanel = new JPanel(new BorderLayout());
-        listPanel.setBackground(CARD_COLOR);
-        listPanel.setBorder(new LineBorder(new Color(230, 230, 230), 1));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(20, 20, 10, 20);
         
-        JLabel listTitle = new JLabel("Active Suppliers");
-        listTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        listTitle.setBorder(new EmptyBorder(15, 20, 10, 20));
+        JLabel emptyIcon = new JLabel("🏪");
+        emptyIcon.setFont(new Font("Segoe UI", Font.PLAIN, 72));
+        emptyPanel.add(emptyIcon, gbc);
         
-        DefaultListModel<String> supplierListModel = new DefaultListModel<>();
-        JList<String> supplierList = new JList<>(supplierListModel);
-        supplierList.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        supplierList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        gbc.gridy = 1;
+        JLabel emptyTitle = new JLabel("No Suppliers Registered");
+        emptyTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        emptyTitle.setForeground(TEXT_PRIMARY);
+        emptyPanel.add(emptyTitle, gbc);
         
-        // Populate supplier list
-        for (Supplier supplier : suppliers) {
-            supplierListModel.addElement(supplier.toString());
-        }
+        gbc.gridy = 2;
+        JLabel emptyMessage = new JLabel("Add suppliers to start tracking performance and managing orders");
+        emptyMessage.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        emptyMessage.setForeground(TEXT_SECONDARY);
+        emptyPanel.add(emptyMessage, gbc);
         
-        JScrollPane listScrollPane = new JScrollPane(supplierList);
-        listScrollPane.setBorder(new EmptyBorder(10, 20, 20, 20));
+        gbc.gridy = 3;
+        gbc.insets = new Insets(20, 20, 20, 20);
+        JButton addFirstSupplierBtn = createModernButton("Add Your First Supplier", SECONDARY_COLOR, 200, 40);
+        addFirstSupplierBtn.addActionListener(e -> addSupplier());
+        emptyPanel.add(addFirstSupplierBtn, gbc);
         
-        listPanel.add(listTitle, BorderLayout.NORTH);
-        listPanel.add(listScrollPane, BorderLayout.CENTER);
-        
-        // Supplier performance metrics
-        JPanel metricsPanel = new JPanel(new BorderLayout());
-        metricsPanel.setBackground(CARD_COLOR);
-        metricsPanel.setBorder(new LineBorder(new Color(230, 230, 230), 1));
-        
-        JLabel metricsTitle = new JLabel("Supplier Performance Overview");
-        metricsTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        metricsTitle.setBorder(new EmptyBorder(15, 20, 10, 20));
-        
-        JTextArea metricsArea = new JTextArea();
-        metricsArea.setEditable(false);
-        metricsArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        metricsArea.setBackground(Color.WHITE);
-        metricsArea.setBorder(new EmptyBorder(10, 20, 20, 20));
-        
-        StringBuilder metrics = new StringBuilder();
-        metrics.append("SUPPLIER PERFORMANCE SUMMARY\n");
-        metrics.append("═══════════════════════════════\n\n");
-        
-        for (Supplier supplier : suppliers) {
-            metrics.append(String.format("• %s - Rating: %.1f/5.0 (%s)\n",
-                supplier.getName(), supplier.getReliabilityRating(), supplier.getReliabilityDescription()));
-            metrics.append(String.format("  Orders: %d | On-time: %.1f%%\n\n",
-                supplier.getTotalOrdersPlaced(), supplier.getOnTimeDeliveryPercentage()));
-        }
-        
-        if (suppliers.isEmpty()) {
-            metrics.append("No suppliers registered yet.\nAdd suppliers to track performance.");
-        }
-        
-        metricsArea.setText(metrics.toString());
-        
-        JScrollPane metricsScrollPane = new JScrollPane(metricsArea);
-        
-        metricsPanel.add(metricsTitle, BorderLayout.NORTH);
-        metricsPanel.add(metricsScrollPane, BorderLayout.CENTER);
-        
-        supplierPanel.add(listPanel);
-        supplierPanel.add(metricsPanel);
-        
+        supplierPanel.add(emptyPanel, BorderLayout.CENTER);
         return supplierPanel;
     }
+    
+    // Split panel for supplier list and details
+    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    splitPane.setResizeWeight(0.5);
+    splitPane.setDividerSize(10);
+    splitPane.setBorder(null);
+    
+    // Top: Supplier Cards Grid
+    JPanel supplierCardsPanel = createSupplierCardsPanel();
+    
+    // Bottom: Performance Metrics
+    JPanel metricsPanel = createSupplierMetricsPanel();
+    
+    splitPane.setTopComponent(supplierCardsPanel);
+    splitPane.setBottomComponent(metricsPanel);
+    
+    supplierPanel.add(splitPane, BorderLayout.CENTER);
+    
+    return supplierPanel;
+}
+
+private JPanel createSupplierCardsPanel() {
+    JPanel cardsPanel = new JPanel(new BorderLayout());
+    cardsPanel.setBackground(CARD_COLOR);
+    cardsPanel.setBorder(new LineBorder(new Color(230, 230, 230), 1));
+    
+    JLabel title = new JLabel("Active Suppliers (" + suppliers.size() + ")");
+    title.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    title.setBorder(new EmptyBorder(15, 20, 10, 20));
+    title.setForeground(TEXT_PRIMARY);
+    
+    // Create scrollable panel for supplier cards
+    JPanel cardsContainer = new JPanel();
+    cardsContainer.setLayout(new BoxLayout(cardsContainer, BoxLayout.Y_AXIS));
+    cardsContainer.setBackground(Color.WHITE);
+    cardsContainer.setBorder(new EmptyBorder(10, 15, 10, 15));
+    
+    for (Supplier supplier : suppliers) {
+        cardsContainer.add(createSupplierCard(supplier));
+        cardsContainer.add(Box.createVerticalStrut(10));
+    }
+    
+    JScrollPane scrollPane = new JScrollPane(cardsContainer);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+    
+    cardsPanel.add(title, BorderLayout.NORTH);
+    cardsPanel.add(scrollPane, BorderLayout.CENTER);
+    
+    return cardsPanel;
+}
+
+    private JPanel createSupplierCard(Supplier supplier) {
+    JPanel card = new JPanel(new BorderLayout(10, 5));
+    card.setBackground(Color.WHITE);
+    card.setBorder(BorderFactory.createCompoundBorder(
+        new LineBorder(new Color(220, 220, 220), 1, true),
+        new EmptyBorder(12, 15, 12, 15)
+    ));
+    card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+    
+    // Left: Supplier info
+    JPanel infoPanel = new JPanel();
+    infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+    infoPanel.setOpaque(false);
+    
+    JLabel nameLabel = new JLabel(supplier.getName());
+    nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    nameLabel.setForeground(TEXT_PRIMARY);
+    
+    JLabel contactLabel = new JLabel("📞 " + supplier.getPhone() + 
+        (supplier.getEmail().isEmpty() ? "" : " | ✉️ " + supplier.getEmail()));
+    contactLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+    contactLabel.setForeground(TEXT_SECONDARY);
+    
+    JLabel addressLabel = new JLabel("📍 " + (supplier.getAddress().isEmpty() ? "No address" : supplier.getAddress()));
+    addressLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+    addressLabel.setForeground(TEXT_SECONDARY);
+    
+    infoPanel.add(nameLabel);
+    infoPanel.add(Box.createVerticalStrut(3));
+    infoPanel.add(contactLabel);
+    infoPanel.add(Box.createVerticalStrut(2));
+    infoPanel.add(addressLabel);
+    
+    // Right: Performance badges
+    JPanel statsPanel = new JPanel(new GridLayout(2, 2, 10, 5));
+    statsPanel.setOpaque(false);
+    
+    // Rating badge
+    JPanel ratingBadge = createStatBadge(
+        String.format("%.1f", supplier.getReliabilityRating()),
+        "Rating",
+        getRatingColor(supplier.getReliabilityRating())
+    );
+    
+    // Orders badge
+    JPanel ordersBadge = createStatBadge(
+        String.valueOf(supplier.getTotalOrdersPlaced()),
+        "Orders",
+        new Color(33, 150, 243)
+    );
+    
+    // On-time badge
+    JPanel onTimeBadge = createStatBadge(
+        String.format("%.0f%%", supplier.getOnTimeDeliveryPercentage()),
+        "On-Time",
+        new Color(76, 175, 80)
+    );
+    
+    // Status badge
+    JPanel statusBadge = createStatBadge(
+        supplier.isActive() ? "Active" : "Inactive",
+        "Status",
+        supplier.isActive() ? new Color(76, 175, 80) : new Color(158, 158, 158)
+    );
+    
+    statsPanel.add(ratingBadge);
+    statsPanel.add(ordersBadge);
+    statsPanel.add(onTimeBadge);
+    statsPanel.add(statusBadge);
+    
+    card.add(infoPanel, BorderLayout.WEST);
+    card.add(statsPanel, BorderLayout.EAST);
+    
+    // Make card clickable
+    card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    card.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            card.setBackground(new Color(248, 249, 250));
+        }
+        
+        @Override
+        public void mouseExited(MouseEvent e) {
+            card.setBackground(Color.WHITE);
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            showSupplierDetails(supplier);
+        }
+    });
+    
+    return card;
+}
+
+    private JPanel createStatBadge(String value, String label, Color color) {
+    JPanel badge = new JPanel(new BorderLayout());
+    badge.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 20));
+    badge.setBorder(new EmptyBorder(8, 10, 8, 10));
+    
+    JLabel valueLabel = new JLabel(value);
+    valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+    valueLabel.setForeground(color);
+    valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    
+    JLabel textLabel = new JLabel(label);
+    textLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+    textLabel.setForeground(TEXT_SECONDARY);
+    textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    
+    badge.add(valueLabel, BorderLayout.CENTER);
+    badge.add(textLabel, BorderLayout.SOUTH);
+    
+    return badge;
+}
+
+    private Color getRatingColor(double rating) {
+    if (rating >= 4.5) return new Color(76, 175, 80);
+    if (rating >= 3.5) return new Color(33, 150, 243);
+    if (rating >= 2.5) return new Color(255, 152, 0);
+    return new Color(244, 67, 54);
+}
+
+    private JPanel createSupplierMetricsPanel() {
+    JPanel metricsPanel = new JPanel(new BorderLayout());
+    metricsPanel.setBackground(CARD_COLOR);
+    metricsPanel.setBorder(new LineBorder(new Color(230, 230, 230), 1));
+    
+    JLabel metricsTitle = new JLabel("Supplier Performance Overview");
+    metricsTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    metricsTitle.setBorder(new EmptyBorder(15, 20, 10, 20));
+    metricsTitle.setForeground(TEXT_PRIMARY);
+    
+    JTextArea metricsArea = new JTextArea();
+    metricsArea.setEditable(false);
+    metricsArea.setFont(new Font("Consolas", Font.PLAIN, 12));
+    metricsArea.setBackground(Color.WHITE);
+    metricsArea.setBorder(new EmptyBorder(10, 20, 20, 20));
+    
+    StringBuilder metrics = new StringBuilder();
+    metrics.append("╔═══════════════════════════════════════════════════════════════════════╗\n");
+    metrics.append("║                    SUPPLIER PERFORMANCE SUMMARY                       ║\n");
+    metrics.append("╠═══════════════════════════════════════════════════════════════════════╣\n\n");
+    
+    // Overall statistics
+    int totalSuppliers = suppliers.size();
+    int activeSuppliers = (int) suppliers.stream().filter(Supplier::isActive).count();
+    double avgRating = suppliers.stream().mapToDouble(Supplier::getReliabilityRating).average().orElse(0);
+    int totalOrders = suppliers.stream().mapToInt(Supplier::getTotalOrdersPlaced).sum();
+    double avgOnTime = suppliers.stream().mapToDouble(Supplier::getOnTimeDeliveryPercentage).average().orElse(0);
+    
+    metrics.append(String.format("📊 OVERVIEW\n"));
+    metrics.append(String.format("   Total Suppliers: %d | Active: %d | Inactive: %d\n", 
+        totalSuppliers, activeSuppliers, totalSuppliers - activeSuppliers));
+    metrics.append(String.format("   Average Rating: %.2f/5.0 | Total Orders: %d | Avg On-Time: %.1f%%\n\n", 
+        avgRating, totalOrders, avgOnTime));
+    
+    metrics.append("─".repeat(75)).append("\n\n");
+    
+    // Individual supplier details
+    metrics.append("📋 DETAILED PERFORMANCE\n\n");
+    
+    for (Supplier supplier : suppliers) {
+        String statusIcon = supplier.isActive() ? "✅" : "⚠️";
+        String ratingStars = "⭐".repeat((int) Math.round(supplier.getReliabilityRating()));
+        
+        metrics.append(String.format("%s %s\n", statusIcon, supplier.getName()));
+        metrics.append(String.format("   Rating: %s (%.1f/5.0) - %s\n", 
+            ratingStars, supplier.getReliabilityRating(), supplier.getReliabilityDescription()));
+        metrics.append(String.format("   Orders: %d total | %d on-time | %.1f%% delivery rate\n",
+            supplier.getTotalOrdersPlaced(), 
+            supplier.getOrdersDeliveredOnTime(),
+            supplier.getOnTimeDeliveryPercentage()));
+        metrics.append(String.format("   Contact: %s\n", supplier.getContactInfo()));
+        
+        if (!supplier.getAddress().isEmpty()) {
+            metrics.append(String.format("   Address: %s\n", supplier.getAddress()));
+        }
+        
+        if (!supplier.getSpecialties().isEmpty()) {
+            metrics.append(String.format("   Specialties: %s\n", String.join(", ", supplier.getSpecialties())));
+        }
+        
+        metrics.append("\n");
+    }
+    
+    metricsArea.setText(metrics.toString());
+    
+    JScrollPane metricsScrollPane = new JScrollPane(metricsArea);
+    metricsScrollPane.setBorder(null);
+    
+    metricsPanel.add(metricsTitle, BorderLayout.NORTH);
+    metricsPanel.add(metricsScrollPane, BorderLayout.CENTER);
+    
+    return metricsPanel;
+}
+
+    private void showSupplierDetails(Supplier supplier) {
+    JDialog dialog = new JDialog(this, "Supplier Details: " + supplier.getName(), true);
+    dialog.setSize(600, 500);
+    dialog.setLocationRelativeTo(this);
+    dialog.setLayout(new BorderLayout());
+    
+    // Header
+    JPanel headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setBackground(PRIMARY_COLOR);
+    headerPanel.setBorder(new EmptyBorder(20, 25, 20, 25));
+    
+    JLabel titleLabel = new JLabel(supplier.getName());
+    titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+    titleLabel.setForeground(Color.WHITE);
+    
+    JLabel subtitleLabel = new JLabel(supplier.getReliabilityDescription() + " Supplier");
+    subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    subtitleLabel.setForeground(new Color(200, 230, 255));
+    
+    JPanel titlePanel = new JPanel(new BorderLayout());
+    titlePanel.setOpaque(false);
+    titlePanel.add(titleLabel, BorderLayout.NORTH);
+    titlePanel.add(subtitleLabel, BorderLayout.CENTER);
+    
+    headerPanel.add(titlePanel, BorderLayout.WEST);
+    
+    // Content
+    JTextArea detailsArea = new JTextArea(supplier.getDetailedInfo());
+    detailsArea.setEditable(false);
+    detailsArea.setFont(new Font("Consolas", Font.PLAIN, 12));
+    detailsArea.setBackground(Color.WHITE);
+    detailsArea.setBorder(new EmptyBorder(20, 20, 20, 20));
+    
+    JScrollPane scrollPane = new JScrollPane(detailsArea);
+    scrollPane.setBorder(null);
+    
+    // Footer with action buttons
+    JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 15));
+    footerPanel.setBackground(CARD_COLOR);
+    footerPanel.setBorder(new MatteBorder(1, 0, 0, 0, new Color(230, 230, 230)));
+    
+    JButton editBtn = createModernButton("Edit", WARNING_COLOR, 80, 35);
+    JButton closeBtn = createModernButton("Close", TEXT_SECONDARY, 80, 35);
+    
+    editBtn.addActionListener(e -> {
+        dialog.dispose();
+        editSupplierDirect(supplier);
+    });
+    
+    closeBtn.addActionListener(e -> dialog.dispose());
+    
+    footerPanel.add(editBtn);
+    footerPanel.add(closeBtn);
+    
+    dialog.add(headerPanel, BorderLayout.NORTH);
+    dialog.add(scrollPane, BorderLayout.CENTER);
+    dialog.add(footerPanel, BorderLayout.SOUTH);
+    
+    dialog.setVisible(true);
+}
+    
+    private void editSupplierDirect(Supplier supplier) {
+    // Create edit dialog with current values
+    JTextField phoneField = new JTextField(supplier.getPhone(), 15);
+    JTextField emailField = new JTextField(supplier.getEmail(), 15);
+    JTextField addressField = new JTextField(supplier.getAddress(), 15);
+    JCheckBox activeCheckbox = new JCheckBox("Active", supplier.isActive());
+    
+    JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
+    panel.add(new JLabel("Phone:"));
+    panel.add(phoneField);
+    panel.add(new JLabel("Email:"));
+    panel.add(emailField);
+    panel.add(new JLabel("Address:"));
+    panel.add(addressField);
+    panel.add(new JLabel("Status:"));
+    panel.add(activeCheckbox);
+    
+    int result = JOptionPane.showConfirmDialog(this, panel, 
+        "Edit Supplier: " + supplier.getName(), JOptionPane.OK_CANCEL_OPTION);
+    
+    if (result == JOptionPane.OK_OPTION) {
+        try {
+            supplier.setPhone(phoneField.getText().trim());
+            supplier.setEmail(emailField.getText().trim());
+            supplier.setAddress(addressField.getText().trim());
+            supplier.setActive(activeCheckbox.isSelected());
+            
+            // Update database
+            SupplierDAO supplierDAO = new SupplierDAO();
+            if (supplierDAO.updateSupplier(supplier)) {
+                updateDisplay();
+                refreshSupplierPanel();
+                JOptionPane.showMessageDialog(this, "Supplier updated successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating supplier in database!");
+            }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), 
+                "Update Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
     
     private JPanel createAnalyticsPanel() {
         JPanel analyticsPanel = new JPanel(new BorderLayout());
@@ -889,6 +1180,7 @@ public class MainFrame extends JFrame {
                     supplierDAO.updateSupplier(selectedSupplier);
                     
                     updateDisplay();
+                    refreshSupplierPanel();
                     
                     JOptionPane.showMessageDialog(this, 
                         String.format("Order created successfully!\nOrder ID: %d\nTotal Cost: $%.2f", 
@@ -961,27 +1253,30 @@ public class MainFrame extends JFrame {
     
     Order order = orders.get(selectedRow);
     if (order.getStatus() == Order.OrderStatus.SHIPPED) {
-    order.deliverOrder();
-    order.getSupplier().recordOnTimeDelivery();
-    
-    // ADD THIS:
-    OrderDAO orderDAO = new OrderDAO();
-    ProductDAO productDAO = new ProductDAO();
-    SupplierDAO supplierDAO = new SupplierDAO();
-    
-    boolean orderUpdated = orderDAO.updateOrder(order);
-    boolean productUpdated = productDAO.updateProduct(order.getProduct());
-    boolean supplierUpdated = supplierDAO.updateSupplier(order.getSupplier());
-    
-    if (orderUpdated && productUpdated && supplierUpdated) {
-        updateDisplay();
-        JOptionPane.showMessageDialog(this, 
-            String.format("Order #%d delivered successfully!\n%s restocked with %d units.", 
-            order.getOrderId(), order.getProduct().getName(), order.getQuantityOrdered()));
+        order.deliverOrder();
+        order.getSupplier().recordOnTimeDelivery();
+        
+        // FIX: Update all three entities in database
+        OrderDAO orderDAO = new OrderDAO();
+        ProductDAO productDAO = new ProductDAO();
+        SupplierDAO supplierDAO = new SupplierDAO();
+        
+        boolean orderUpdated = orderDAO.updateOrder(order);
+        boolean productUpdated = productDAO.updateProduct(order.getProduct());
+        boolean supplierUpdated = supplierDAO.updateSupplier(order.getSupplier());
+        
+        if (orderUpdated && productUpdated && supplierUpdated) {
+            updateDisplay();
+            refreshSupplierPanel();
+            JOptionPane.showMessageDialog(this, 
+                String.format("Order #%d delivered successfully!\n%s restocked with %d units.", 
+                order.getOrderId(), order.getProduct().getName(), order.getQuantityOrdered()));
+        } else {
+            JOptionPane.showMessageDialog(this, "Error updating database!");
+        }
     } else {
-        JOptionPane.showMessageDialog(this, "Error updating database!");
+        JOptionPane.showMessageDialog(this, "Only shipped orders can be marked as delivered.");
     }
-}
 }
     
     private void addSupplier() {
@@ -1020,6 +1315,7 @@ public class MainFrame extends JFrame {
             if (supplierDAO.addSupplier(supplier)) {
                 suppliers.add(supplier);
                 updateDisplay();
+                refreshSupplierPanel(); // Refresh the supplier UI
                 
                 JOptionPane.showMessageDialog(this, "Supplier added successfully!");
             } else {
@@ -1033,8 +1329,67 @@ public class MainFrame extends JFrame {
 }
     
     private void editSupplier() {
-        JOptionPane.showMessageDialog(this, "Edit Supplier functionality - Coming Soon!");
+    if (suppliers.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No suppliers available!");
+        return;
     }
+    
+    // Select supplier to edit
+    String[] supplierNames = suppliers.stream().map(Supplier::getName).toArray(String[]::new);
+    String selectedName = (String) JOptionPane.showInputDialog(this,
+        "Select supplier to edit:", "Edit Supplier",
+        JOptionPane.QUESTION_MESSAGE, null, supplierNames, supplierNames[0]);
+    
+    if (selectedName != null) {
+        Supplier supplier = suppliers.stream()
+            .filter(s -> s.getName().equals(selectedName))
+            .findFirst().orElse(null);
+        
+        if (supplier != null) {
+            // Create edit dialog with current values
+            JTextField phoneField = new JTextField(supplier.getPhone(), 15);
+            JTextField emailField = new JTextField(supplier.getEmail(), 15);
+            JTextField addressField = new JTextField(supplier.getAddress(), 15);
+            JCheckBox activeCheckbox = new JCheckBox("Active", supplier.isActive());
+            
+            JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
+            panel.add(new JLabel("Phone:"));
+            panel.add(phoneField);
+            panel.add(new JLabel("Email:"));
+            panel.add(emailField);
+            panel.add(new JLabel("Address:"));
+            panel.add(addressField);
+            panel.add(new JLabel("Status:"));
+            panel.add(activeCheckbox);
+            
+            int result = JOptionPane.showConfirmDialog(this, panel, 
+                "Edit Supplier: " + selectedName, JOptionPane.OK_CANCEL_OPTION);
+            
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    supplier.setPhone(phoneField.getText().trim());
+                    supplier.setEmail(emailField.getText().trim());
+                    supplier.setAddress(addressField.getText().trim());
+                    supplier.setActive(activeCheckbox.isSelected());
+                    
+                    // Update database
+                    SupplierDAO supplierDAO = new SupplierDAO();
+                    if (supplierDAO.updateSupplier(supplier)) {
+                        updateDisplay();
+                        refreshSupplierPanel();
+                        JOptionPane.showMessageDialog(this, "Supplier updated successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error updating supplier in database!");
+                    }
+                    
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), 
+                        "Update Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+}
     
     private void viewSupplierDetails() {
         if (suppliers.isEmpty()) {
@@ -1122,6 +1477,19 @@ public class MainFrame extends JFrame {
             updateAnalyticsDisplay(analyticsArea);
         }
     }
+    private void refreshSupplierPanel() {
+    // Get the suppliers tab (index 2)
+    if (tabbedPane.getComponentCount() > 2) {
+        JPanel suppliersPanel = (JPanel) tabbedPane.getComponentAt(2);
+        suppliersPanel.removeAll();
+        suppliersPanel.setLayout(new BorderLayout(10, 10));
+        suppliersPanel.setBackground(BACKGROUND_COLOR);
+        suppliersPanel.add(createSupplierControlPanel(), BorderLayout.NORTH);
+        suppliersPanel.add(createSupplierInfoPanel(), BorderLayout.CENTER);
+        suppliersPanel.revalidate();
+        suppliersPanel.repaint();
+    }
+}
     
     private void updateStatusPanel() {
         int totalProducts = products.size();

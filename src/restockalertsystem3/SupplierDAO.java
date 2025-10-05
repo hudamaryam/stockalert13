@@ -59,39 +59,44 @@ public class SupplierDAO {
     }
     
     public List<Supplier> getAllSuppliers() {
-        List<Supplier> suppliers = new ArrayList<>();
-        String sql = "SELECT * FROM suppliers ORDER BY name";
+    List<Supplier> suppliers = new ArrayList<>();
+    String sql = "SELECT * FROM suppliers ORDER BY name";
+    
+    try (Connection conn = DatabaseConnection.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        while (rs.next()) {
+            Supplier supplier = new Supplier(
+                rs.getString("name"),
+                rs.getString("phone"),
+                rs.getString("email"),
+                rs.getString("address")
+            );
             
-            while (rs.next()) {
-                Supplier supplier = new Supplier(
-                    rs.getString("name"),
-                    rs.getString("phone"),
-                    rs.getString("email"),
-                    rs.getString("address")
-                );
-                
-                supplier.setActive(rs.getBoolean("is_active"));
-                
-                // Load specialties
-                int supplierId = rs.getInt("id");
-                List<String> specialties = getSupplierSpecialties(supplierId);
-                for (String specialty : specialties) {
-                    supplier.addSpecialty(specialty);
-                }
-                
-                suppliers.add(supplier);
+            supplier.setActive(rs.getBoolean("is_active"));
+            
+            // FIX: Use setters to load statistics correctly
+            supplier.setTotalOrdersPlaced(rs.getInt("total_orders"));
+            supplier.setOrdersDeliveredOnTime(rs.getInt("orders_on_time"));
+            supplier.setReliabilityRating(rs.getDouble("reliability_rating"));
+            
+            // Load specialties
+            int supplierId = rs.getInt("id");
+            List<String> specialties = getSupplierSpecialties(supplierId);
+            for (String specialty : specialties) {
+                supplier.addSpecialty(specialty);
             }
             
-        } catch (SQLException e) {
-            e.printStackTrace();
+            suppliers.add(supplier);
         }
         
-        return suppliers;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    
+    return suppliers;
+}
     
     private List<String> getSupplierSpecialties(int supplierId) {
         List<String> specialties = new ArrayList<>();

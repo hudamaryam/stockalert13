@@ -86,6 +86,19 @@ public class Supplier {
     }
     
     // Setters
+    // Add these new setter methods
+    public void setTotalOrdersPlaced(int totalOrdersPlaced) {
+        this.totalOrdersPlaced = totalOrdersPlaced;
+    }
+
+    public void setOrdersDeliveredOnTime(int ordersDeliveredOnTime) {
+        this.ordersDeliveredOnTime = ordersDeliveredOnTime;
+    }
+
+    public void setReliabilityRating(double reliabilityRating) {
+        this.reliabilityRating = reliabilityRating;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
