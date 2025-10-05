@@ -27,20 +27,19 @@ public class SupplierDAO {
         int rowsAffected = pstmt.executeUpdate();
         
         if (rowsAffected > 0) {
-            // FIX: Retrieve the ID the database generated
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                int dbId = rs.getInt(1);
-                
-                // CRITICAL FIX: Set the database ID back on the Java object
-                supplier.setId(dbId); 
-                
-                // Insert specialties using the correct database ID
-                for (String specialty : supplier.getSpecialties()) {
-                    addSupplierSpecialty(dbId, specialty); // Use dbId here
-                }
+            int dbId = rs.getInt(1);
+            supplier.setId(dbId); 
+        
+        // FIX: Only execute the loop if specialties exist
+            if (!supplier.getSpecialties().isEmpty()) {
+            for (String specialty : supplier.getSpecialties()) {
+                addSupplierSpecialty(dbId, specialty); 
             }
-            return true;
+        }
+    }
+    return true;
         }
         
     } catch (SQLException e) {
