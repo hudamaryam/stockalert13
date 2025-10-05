@@ -324,7 +324,44 @@ public class MainFrame extends JFrame {
         
         return tablePanel;
     }
+    // Add this method inside the 'MainFrame' class, 
+// likely around line 430, near other create*Panel methods.
+
+private JPanel createSupplierControlPanel() {
+    JPanel controlPanel = new JPanel(new BorderLayout());
+    controlPanel.setBackground(CARD_COLOR);
+    controlPanel.setBorder(BorderFactory.createCompoundBorder(
+        new LineBorder(new Color(230, 230, 230), 1),
+        new EmptyBorder(15, 20, 15, 20)
+    ));
     
+    // Left Side - Title
+    JLabel titleLabel = new JLabel("Supplier Management");
+    titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+    titleLabel.setForeground(TEXT_PRIMARY);
+    
+    // Right Side - Action Buttons
+    JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+    rightPanel.setOpaque(false);
+    
+    JButton addSupplierBtn = createModernButton("Add Supplier", SECONDARY_COLOR, 130, 35);
+    JButton editSupplierBtn = createModernButton("Edit", WARNING_COLOR, 80, 35);
+    JButton viewDetailsBtn = createModernButton("View Details", PRIMARY_COLOR, 120, 35);
+    
+    // Link actions (assuming these methods exist in MainFrame)
+    addSupplierBtn.addActionListener(e -> addSupplier());
+    editSupplierBtn.addActionListener(e -> editSupplier());
+    viewDetailsBtn.addActionListener(e -> viewSupplierDetails());
+    
+    rightPanel.add(addSupplierBtn);
+    rightPanel.add(editSupplierBtn);
+    rightPanel.add(viewDetailsBtn);
+    
+    controlPanel.add(titleLabel, BorderLayout.WEST);
+    controlPanel.add(rightPanel, BorderLayout.EAST);
+    
+    return controlPanel;
+}
     // Replace the createSupplierInfoPanel() method in MainFrame.java with this improved version
 
     private JPanel createSupplierInfoPanel() {
