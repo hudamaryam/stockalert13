@@ -1350,7 +1350,7 @@ private JPanel createSupplierCardsPanel() {
             // FIX: Save supplier to database
             SupplierDAO supplierDAO = new SupplierDAO();
             if (supplierDAO.addSupplier(supplier)) {
-                suppliers.add(supplier);
+                suppliers = (ArrayList<Supplier>) supplierDAO.getAllSuppliers();
                 updateDisplay();
                 refreshSupplierPanel(); // Refresh the supplier UI
                 
